@@ -36,7 +36,7 @@ def get_image_filenames(path: Union[str, Path]) -> List[Path]:
     if path.is_dir():
         image_filenames = [p for p in path.glob("**/*") if p.suffix in IMG_EXTENSIONS]
 
-    if len(image_filenames) == 0:
+    if not image_filenames:
         raise ValueError(f"Found 0 images in {path}")
 
     return image_filenames
@@ -68,7 +68,10 @@ def duplicate_filename(path: Union[str, Path]) -> Path:
 
     i = 0
     while True:
-        duplicated_path = path if i == 0 else path.parent / (path.stem + f"_{i}" + path.suffix)
+        duplicated_path = (
+            path if i == 0 else path.parent / f"{path.stem}_{i}{path.suffix}"
+        )
+
         if not duplicated_path.exists():
             break
         i += 1
@@ -224,5 +227,4 @@ def pad_nextpow2(batch: Tensor) -> Tensor:
     l_dim = 2 ** math.ceil(math.log(max(*batch.shape[-2:]), 2))
     padding_w = [math.ceil((l_dim - batch.shape[-2]) / 2), math.floor((l_dim - batch.shape[-2]) / 2)]
     padding_h = [math.ceil((l_dim - batch.shape[-1]) / 2), math.floor((l_dim - batch.shape[-1]) / 2)]
-    padded_batch = F.pad(batch, pad=[*padding_h, *padding_w])
-    return padded_batch
+    return F.pad(batch, pad=[*padding_h, *padding_w])

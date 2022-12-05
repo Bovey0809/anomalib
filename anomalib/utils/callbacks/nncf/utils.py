@@ -186,7 +186,7 @@ def _merge_dicts_and_lists_b_into_a(a, b, cur_key=None):
         if k not in a:
             a[k] = copy(b[k])
             continue
-        new_cur_key = cur_key + "." + k if cur_key else k
+        new_cur_key = f"{cur_key}.{k}" if cur_key else k
         if isinstance(a[k], (dict, list)):
             a[k] = _merge_dicts_and_lists_b_into_a(a[k], b[k], new_cur_key)
             continue

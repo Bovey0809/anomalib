@@ -75,23 +75,20 @@ class PatchcoreModel(DynamicBufferModule, nn.Module):
         embedding = self.reshape_embedding(embedding)
 
         if self.training:
-            output = embedding
-        else:
-            # apply nearest neighbor search
-            patch_scores, locations = self.nearest_neighbors(embedding=embedding, n_neighbors=1)
-            # reshape to batch dimension
-            patch_scores = patch_scores.reshape((batch_size, -1))
-            locations = locations.reshape((batch_size, -1))
-            # compute anomaly score
-            anomaly_score = self.compute_anomaly_score(patch_scores, locations, embedding)
-            # reshape to w, h
-            patch_scores = patch_scores.reshape((batch_size, 1, width, height))
-            # get anomaly map
-            anomaly_map = self.anomaly_map_generator(patch_scores)
+            return embedding
+        # apply nearest neighbor search
+        patch_scores, locations = self.nearest_neighbors(embedding=embedding, n_neighbors=1)
+        # reshape to batch dimension
+        patch_scores = patch_scores.reshape((batch_size, -1))
+        locations = locations.reshape((batch_size, -1))
+        # compute anomaly score
+        anomaly_score = self.compute_anomaly_score(patch_scores, locations, embedding)
+        # reshape to w, h
+        patch_scores = patch_scores.reshape((batch_size, 1, width, height))
+        # get anomaly map
+        anomaly_map = self.anomaly_map_generator(patch_scores)
 
-            output = (anomaly_map, anomaly_score)
-
-        return output
+        return anomaly_map, anomaly_score
 
     def generate_embedding(self, features: Dict[str, Tensor]) -> Tensor:
         """Generate embedding from hierarchical feature map.

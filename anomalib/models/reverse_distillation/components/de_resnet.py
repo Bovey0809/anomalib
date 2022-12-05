@@ -237,22 +237,31 @@ class ResNet(nn.Module):
                 norm_layer(planes * block.expansion),
             )
 
-        layers = []
-        layers.append(
-            block(self.inplanes, planes, stride, upsample, self.groups, self.base_width, previous_dilation, norm_layer)
-        )
-        self.inplanes = planes * block.expansion
-        for _ in range(1, blocks):
-            layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    groups=self.groups,
-                    base_width=self.base_width,
-                    dilation=self.dilation,
-                    norm_layer=norm_layer,
-                )
+        layers = [
+            block(
+                self.inplanes,
+                planes,
+                stride,
+                upsample,
+                self.groups,
+                self.base_width,
+                previous_dilation,
+                norm_layer,
             )
+        ]
+
+        self.inplanes = planes * block.expansion
+        layers.extend(
+            block(
+                self.inplanes,
+                planes,
+                groups=self.groups,
+                base_width=self.base_width,
+                dilation=self.dilation,
+                norm_layer=norm_layer,
+            )
+            for _ in range(1, blocks)
+        )
 
         return nn.Sequential(*layers)
 
@@ -266,8 +275,7 @@ class ResNet(nn.Module):
 
 
 def _resnet(block: Type[Union[DecoderBasicBlock, DecoderBottleneck]], layers: List[int], **kwargs: Any) -> ResNet:
-    model = ResNet(block, layers, **kwargs)
-    return model
+    return ResNet(block, layers, **kwargs)
 
 
 def de_resnet18() -> ResNet:
@@ -324,7 +332,7 @@ def get_decoder(name: str) -> ResNet:
     Returns:
         ResNet: Decoder ResNet architecture.
     """
-    if name in (
+    if name in {
         "resnet18",
         "resnet34",
         "resnet50",
@@ -334,7 +342,7 @@ def get_decoder(name: str) -> ResNet:
         "resnext101_32x8d",
         "wide_resnet50_2",
         "wide_resnet101_2",
-    ):
+    }:
         decoder = globals()[f"de_{name}"]
     else:
         raise ValueError(f"Decoder with architecture {name} not supported")

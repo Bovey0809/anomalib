@@ -214,7 +214,4 @@ class AUPRO(Metric):
         # and the left neighbour should hence be at most number of intervals -1, i.e. old_x.size(0) - 2
         idx = torch.clamp(idx, 0, old_x.size(0) - 2)
 
-        # perform actual linear interpolation
-        y_new = old_y[idx] + slope[idx] * (new_x - old_x[idx])
-
-        return y_new
+        return old_y[idx] + slope[idx] * (new_x - old_x[idx])

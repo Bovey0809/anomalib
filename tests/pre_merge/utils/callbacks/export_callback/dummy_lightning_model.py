@@ -56,11 +56,12 @@ class DummyLightningModule(pl.LightningModule):
             ImageVisualizerCallback(
                 mode="full",
                 task="segmentation",
-                image_save_path=hparams.project.path + "/images",
+                image_save_path=f"{hparams.project.path}/images",
                 log_images=False,
                 save_images=True,
             )
-        ]  # test if this is removed
+        ]
+
 
         self.image_threshold = AnomalyScoreThreshold(hparams.model.threshold.image_default).cpu()
         self.pixel_threshold = AnomalyScoreThreshold(hparams.model.threshold.pixel_default).cpu()

@@ -53,5 +53,4 @@ class AnomalyMapGenerator(nn.Module):
         Returns:
             Tensor: anomaly_map
         """
-        anomaly_map = self.compute_anomaly_map(patch_scores)
-        return anomaly_map
+        return self.compute_anomaly_map(patch_scores)

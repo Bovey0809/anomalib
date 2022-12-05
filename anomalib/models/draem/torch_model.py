@@ -67,8 +67,7 @@ class ReconstructiveSubNetwork(nn.Module):
             Batch of reconstructed images.
         """
         encoded = self.encoder(batch)
-        decoded = self.decoder(encoded)
-        return decoded
+        return self.decoder(encoded)
 
 
 class DiscriminativeSubNetwork(nn.Module):
@@ -96,8 +95,7 @@ class DiscriminativeSubNetwork(nn.Module):
             Activations of the output layer corresponding to the normal and anomalous class scores on the pixel level.
         """
         act1, act2, act3, act4, act5, act6 = self.encoder_segment(batch)
-        segmentation = self.decoder_segment(act1, act2, act3, act4, act5, act6)
-        return segmentation
+        return self.decoder_segment(act1, act2, act3, act4, act5, act6)
 
 
 class EncoderDiscriminative(nn.Module):
@@ -311,8 +309,7 @@ class DecoderDiscriminative(nn.Module):
         cat4 = torch.cat((up4, act1), dim=1)
         db4 = self.db4(cat4)
 
-        out = self.fin_out(db4)
-        return out
+        return self.fin_out(db4)
 
 
 class EncoderReconstructive(nn.Module):
@@ -390,8 +387,7 @@ class EncoderReconstructive(nn.Module):
         mp3 = self.mp3(act3)
         act4 = self.block4(mp3)
         mp4 = self.mp4(act4)
-        act5 = self.block5(mp4)
-        return act5
+        return self.block5(mp4)
 
 
 class DecoderReconstructive(nn.Module):
@@ -489,5 +485,4 @@ class DecoderReconstructive(nn.Module):
         up4 = self.up4(db3)
         db4 = self.db4(up4)
 
-        out = self.fin_out(db4)
-        return out
+        return self.fin_out(db4)

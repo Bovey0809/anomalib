@@ -69,9 +69,10 @@ class GaussianBlur2d(nn.Module):
         # convolve the tensor with the kernel.
         output = F.conv2d(input_tensor, self.kernel, groups=self.channels, padding=0, stride=1)
 
-        if self.padding == "same":
-            out = output.view(batch, channel, height, width)
-        else:
-            out = output.view(batch, channel, height - self.height + 1, width - self.width + 1)
-
-        return out
+        return (
+            output.view(batch, channel, height, width)
+            if self.padding == "same"
+            else output.view(
+                batch, channel, height - self.height + 1, width - self.width + 1
+            )
+        )

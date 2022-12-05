@@ -72,10 +72,7 @@ def create_fast_flow_block(
     """
     nodes = SequenceINN(*input_dimensions)
     for i in range(flow_steps):
-        if i % 2 == 1 and not conv3x3_only:
-            kernel_size = 1
-        else:
-            kernel_size = 3
+        kernel_size = 1 if i % 2 == 1 and not conv3x3_only else 3
         nodes.append(
             AllInOneBlock,
             subnet_constructor=subnet_conv_func(kernel_size, hidden_ratio),
@@ -115,11 +112,11 @@ class FastflowModel(nn.Module):
 
         self.input_size = input_size
 
-        if backbone in ["cait_m48_448", "deit_base_distilled_patch16_384"]:
+        if backbone in {"cait_m48_448", "deit_base_distilled_patch16_384"}:
             self.feature_extractor = timm.create_model(backbone, pretrained=pre_trained)
             channels = [768]
             scales = [16]
-        elif backbone in ["resnet18", "wide_resnet50_2"]:
+        elif backbone in {"resnet18", "wide_resnet50_2"}:
             self.feature_extractor = timm.create_model(
                 backbone,
                 pretrained=pre_trained,
@@ -230,8 +227,7 @@ class FastflowModel(nn.Module):
         feature = self.feature_extractor.norm(feature)
         feature = feature.permute(0, 2, 1)
         feature = feature.reshape(batch_size, num_channels, self.input_size[0] // 16, self.input_size[1] // 16)
-        features = [feature]
-        return features
+        return [feature]
 
     def _get_vit_features(self, input_tensor: Tensor) -> List[Tensor]:
         """Get Vision Transformers (ViT) features.
@@ -263,5 +259,4 @@ class FastflowModel(nn.Module):
         batch_size, _, num_channels = feature.shape
         feature = feature.permute(0, 2, 1)
         feature = feature.reshape(batch_size, num_channels, self.input_size[0] // 16, self.input_size[1] // 16)
-        features = [feature]
-        return features
+        return [feature]

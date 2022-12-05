@@ -34,8 +34,7 @@ def get_args() -> Namespace:
     parser.add_argument("--config", type=str, required=False, help="Path to a model config file")
     parser.add_argument("--log-level", type=str, default="INFO", help="<DEBUG, INFO, WARNING, ERROR>")
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def train():

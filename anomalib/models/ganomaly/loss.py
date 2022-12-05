@@ -47,8 +47,7 @@ class GeneratorLoss(nn.Module):
         error_con = self.loss_con(images, fake)
         error_adv = self.loss_adv(pred_real, pred_fake)
 
-        loss = error_adv * self.wadv + error_con * self.wcon + error_enc * self.wenc
-        return loss
+        return error_adv * self.wadv + error_con * self.wcon + error_enc * self.wenc
 
 
 class DiscriminatorLoss(nn.Module):
@@ -75,5 +74,4 @@ class DiscriminatorLoss(nn.Module):
         error_discriminator_fake = self.loss_bce(
             pred_fake, torch.zeros(size=pred_fake.shape, dtype=torch.float32, device=pred_fake.device)
         )
-        loss_discriminator = (error_discriminator_fake + error_discriminator_real) * 0.5
-        return loss_discriminator
+        return (error_discriminator_fake + error_discriminator_real) * 0.5

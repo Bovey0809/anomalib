@@ -76,11 +76,10 @@ class Cflow(AnomalyModule):
         for decoder_idx in range(len(self.model.pool_layers)):
             decoders_parameters.extend(list(self.model.decoders[decoder_idx].parameters()))
 
-        optimizer = optim.Adam(
+        return optim.Adam(
             params=decoders_parameters,
             lr=self.learning_rate,
         )
-        return optimizer
 
     def training_step(self, batch, _):  # pylint: disable=arguments-differ
         """Training Step of CFLOW.

@@ -68,6 +68,4 @@ def get_openvino_throughput(config: Union[DictConfig, ListConfig], model_path: P
 
     # get throughput
     inference_time = time.time() - start_time
-    throughput = len(test_dataset) / inference_time
-
-    return throughput
+    return len(test_dataset) / inference_time

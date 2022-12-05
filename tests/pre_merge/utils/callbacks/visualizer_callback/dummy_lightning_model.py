@@ -37,11 +37,12 @@ class DummyModule(AnomalyModule):
             ImageVisualizerCallback(
                 task=self.task,
                 mode=self.mode,
-                image_save_path=hparams.project.path + "/images",
+                image_save_path=f"{hparams.project.path}/images",
                 log_images=True,
                 save_images=True,
             )
-        ]  # test if this is removed
+        ]
+
 
         self.image_metrics, self.pixel_metrics = get_metrics(hparams)
         self.image_metrics.set_threshold(hparams.model.threshold.image_default)
@@ -50,7 +51,7 @@ class DummyModule(AnomalyModule):
     def test_step(self, batch, _):
         """Only used to trigger on_test_epoch_end."""
         self.log(name="loss", value=0.0, prog_bar=True)
-        outputs = dict(
+        return dict(
             image_path=[Path(get_dataset_path("bottle")) / "broken_large/000.png"],
             image=torch.rand((1, 3, 100, 100)),
             mask=torch.zeros((1, 100, 100)),
@@ -59,7 +60,6 @@ class DummyModule(AnomalyModule):
             pred_labels=torch.Tensor([0]),
             pred_masks=torch.zeros((1, 100, 100)),
         )
-        return outputs
 
     def validation_epoch_end(self, outputs):
         return None

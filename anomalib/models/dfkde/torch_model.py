@@ -177,9 +177,7 @@ class DfkdeModel(nn.Module):
         """
 
         scores = self.compute_kde_scores(features, as_log_likelihood=True)
-        probabilities = self.compute_probabilities(scores)
-
-        return probabilities
+        return self.compute_probabilities(scores)
 
     def forward(self, batch: Tensor) -> Tensor:
         """Prediction by normality model.

@@ -81,7 +81,7 @@ def get_transforms(
 
     transforms: A.Compose
 
-    if config is None and image_size is not None:
+    if config is None:
         logger.warning("Transform configs has not been provided. Images will be normalized using ImageNet statistics.")
 
         height, width = get_image_height_and_width(image_size)
@@ -101,9 +101,8 @@ def get_transforms(
         else:
             raise ValueError("config could be either ``str`` or ``A.Compose``")
 
-    if not to_tensor:
-        if isinstance(transforms[-1], ToTensorV2):
-            transforms = A.Compose(transforms[:-1])
+    if not to_tensor and isinstance(transforms[-1], ToTensorV2):
+        transforms = A.Compose(transforms[:-1])
 
     # always resize to specified image size
     if not any(isinstance(transform, A.Resize) for transform in transforms) and image_size is not None:

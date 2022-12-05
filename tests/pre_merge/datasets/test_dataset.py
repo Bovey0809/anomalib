@@ -94,13 +94,10 @@ class TestMVTecDataModule:
 
     def test_non_overlapping_splits(self, mvtec_data_module):
         """This test ensures that the train and test splits generated are non-overlapping."""
-        assert (
-            len(
-                set(mvtec_data_module.test_data.samples["image_path"].values).intersection(
-                    set(mvtec_data_module.train_data.samples["image_path"].values)
-                )
-            )
-            == 0
+        assert not set(
+            mvtec_data_module.test_data.samples["image_path"].values
+        ).intersection(
+            set(mvtec_data_module.train_data.samples["image_path"].values)
         ), "Found train and test split contamination"
 
 
@@ -124,13 +121,10 @@ class TestBTechDataModule:
 
     def test_non_overlapping_splits(self, btech_data_module):
         """This test ensures that the train and test splits generated are non-overlapping."""
-        assert (
-            len(
-                set(btech_data_module.test_data.samples["image_path"].values).intersection(
-                    set(btech_data_module.train_data.samples["image_path"].values)
-                )
-            )
-            == 0
+        assert not set(
+            btech_data_module.test_data.samples["image_path"].values
+        ).intersection(
+            set(btech_data_module.train_data.samples["image_path"].values)
         ), "Found train and test split contamination"
 
 
@@ -154,13 +148,10 @@ class TestFolderDataModule:
 
     def test_non_overlapping_splits(self, folder_data_module):
         """This test ensures that the train and test splits generated are non-overlapping."""
-        assert (
-            len(
-                set(folder_data_module.test_data.samples["image_path"].values).intersection(
-                    set(folder_data_module.train_data.samples["image_path"].values)
-                )
-            )
-            == 0
+        assert not set(
+            folder_data_module.test_data.samples["image_path"].values
+        ).intersection(
+            set(folder_data_module.train_data.samples["image_path"].values)
         ), "Found train and test split contamination"
 
 
