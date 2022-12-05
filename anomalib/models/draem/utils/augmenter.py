@@ -43,7 +43,12 @@ class Augmenter:
         self.anomaly_source_paths = []
         if anomaly_source_path is not None:
             for img_ext in IMG_EXTENSIONS:
-                self.anomaly_source_paths.extend(glob.glob(anomaly_source_path + "/**/*" + img_ext, recursive=True))
+                self.anomaly_source_paths.extend(
+                    glob.glob(
+                        f"{anomaly_source_path}/**/*{img_ext}", recursive=True
+                    )
+                )
+
 
         self.augmenters = [
             iaa.GammaContrast((0.5, 2.0), per_channel=True),
@@ -66,8 +71,13 @@ class Augmenter:
             A selection of 3 transforms.
         """
         aug_ind = np.random.choice(np.arange(len(self.augmenters)), 3, replace=False)
-        aug = iaa.Sequential([self.augmenters[aug_ind[0]], self.augmenters[aug_ind[1]], self.augmenters[aug_ind[2]]])
-        return aug
+        return iaa.Sequential(
+            [
+                self.augmenters[aug_ind[0]],
+                self.augmenters[aug_ind[1]],
+                self.augmenters[aug_ind[2]],
+            ]
+        )
 
     def generate_perturbation(
         self, height: int, width: int, anomaly_source_path: Optional[str]

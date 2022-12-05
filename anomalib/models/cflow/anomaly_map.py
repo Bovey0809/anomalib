@@ -53,10 +53,7 @@ class AnomalyMapGenerator(nn.Module):
         for layer_idx in range(len(self.pool_layers)):
             score_map += layer_maps[layer_idx]
 
-        # Invert probs to anomaly scores
-        anomaly_map = score_map.max() - score_map
-
-        return anomaly_map
+        return score_map.max() - score_map
 
     def forward(self, **kwargs: Union[List[Tensor], List[int], List[List]]) -> Tensor:
         """Returns anomaly_map.
@@ -74,7 +71,11 @@ class AnomalyMapGenerator(nn.Module):
         Returns:
             torch.Tensor: anomaly map
         """
-        if not ("distribution" in kwargs and "height" in kwargs and "width" in kwargs):
+        if (
+            "distribution" not in kwargs
+            or "height" not in kwargs
+            or "width" not in kwargs
+        ):
             raise KeyError(f"Expected keys `distribution`, `height` and `width`. Found {kwargs.keys()}")
 
         # placate mypy

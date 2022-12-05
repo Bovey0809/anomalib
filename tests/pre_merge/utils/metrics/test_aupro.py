@@ -8,41 +8,42 @@ from tests.helpers.aupro_reference import calculate_au_pro
 
 
 def pytest_generate_tests(metafunc):
-    if metafunc.function is test_pro:
-        labels = [
-            torch.tensor(
+    if metafunc.function is not test_pro:
+        return
+    labels = [
+        torch.tensor(
+            [
                 [
-                    [
-                        [0, 0, 0, 1, 0, 0, 0],
-                    ]
-                    * 400,
+                    [0, 0, 0, 1, 0, 0, 0],
                 ]
-            ),
-            torch.tensor(
+                * 400,
+            ]
+        ),
+        torch.tensor(
+            [
                 [
-                    [
-                        [0, 1, 0, 1, 0, 1, 0],
-                    ]
-                    * 400,
+                    [0, 1, 0, 1, 0, 1, 0],
                 ]
-            ),
-        ]
-        preds = torch.arange(2800) / 2800.0
-        preds = preds.view(1, 1, 400, 7)
+                * 400,
+            ]
+        ),
+    ]
+    preds = torch.arange(2800) / 2800.0
+    preds = preds.view(1, 1, 400, 7)
 
-        preds = [preds, preds]
+    preds = [preds, preds]
 
-        fpr_limit = [1 / 3, 1 / 3]
-        aupro = [torch.tensor(1 / 6), torch.tensor(1 / 6)]
+    aupro = [torch.tensor(1 / 6), torch.tensor(1 / 6)]
 
-        # Also test that per-region aupros are averaged
-        labels.append(torch.cat(labels))
-        preds.append(torch.cat(preds))
-        fpr_limit.append(float(np.mean(fpr_limit)))
-        aupro.append(torch.tensor(np.mean(aupro)))
+    # Also test that per-region aupros are averaged
+    labels.append(torch.cat(labels))
+    preds.append(torch.cat(preds))
+    fpr_limit = [1 / 3, 1 / 3]
+    fpr_limit.append(float(np.mean(fpr_limit)))
+    aupro.append(torch.tensor(np.mean(aupro)))
 
-        vals = list(zip(labels, preds, fpr_limit, aupro))
-        metafunc.parametrize(argnames=("labels", "preds", "fpr_limit", "aupro"), argvalues=vals)
+    vals = list(zip(labels, preds, fpr_limit, aupro))
+    metafunc.parametrize(argnames=("labels", "preds", "fpr_limit", "aupro"), argvalues=vals)
 
 
 def test_pro(labels, preds, fpr_limit, aupro):

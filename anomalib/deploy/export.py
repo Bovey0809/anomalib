@@ -33,7 +33,6 @@ def get_model_metadata(model: AnomalyModule) -> Dict[str, Tensor]:
     Returns:
         Dict[str, Tensor]: metadata
     """
-    meta_data = {}
     cached_meta_data: Dict[str, Union[Number, Tensor]] = {
         "image_threshold": model.image_threshold.cpu().value.item(),
         "pixel_threshold": model.pixel_threshold.cpu().value.item(),
@@ -41,10 +40,12 @@ def get_model_metadata(model: AnomalyModule) -> Dict[str, Tensor]:
     if hasattr(model, "normalization_metrics") and model.normalization_metrics.state_dict() is not None:
         for key, value in model.normalization_metrics.state_dict().items():
             cached_meta_data[key] = value.cpu()
-    # Remove undefined values by copying in a new dict
-    for key, val in cached_meta_data.items():
-        if not np.isinf(val).all():
-            meta_data[key] = val
+    meta_data = {
+        key: val
+        for key, val in cached_meta_data.items()
+        if not np.isinf(val).all()
+    }
+
     del cached_meta_data
     return meta_data
 

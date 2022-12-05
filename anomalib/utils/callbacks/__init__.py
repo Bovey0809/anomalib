@@ -95,14 +95,16 @@ def get_callbacks(config: Union[ListConfig, DictConfig]) -> List[Callback]:
         load_model = LoadModelCallback(config.trainer.resume_from_checkpoint)
         callbacks.append(load_model)
 
-    if "normalization_method" in config.model.keys() and not config.model.normalization_method == "none":
+    if (
+        "normalization_method" in config.model.keys()
+        and config.model.normalization_method != "none"
+    ):
         if config.model.normalization_method == "cdf":
-            if config.model.name in ["padim", "stfpm"]:
-                if "nncf" in config.optimization and config.optimization.nncf.apply:
-                    raise NotImplementedError("CDF Score Normalization is currently not compatible with NNCF.")
-                callbacks.append(CdfNormalizationCallback())
-            else:
+            if config.model.name not in ["padim", "stfpm"]:
                 raise NotImplementedError("Score Normalization is currently supported for PADIM and STFPM only.")
+            if "nncf" in config.optimization and config.optimization.nncf.apply:
+                raise NotImplementedError("CDF Score Normalization is currently not compatible with NNCF.")
+            callbacks.append(CdfNormalizationCallback())
         elif config.model.normalization_method == "min_max":
             callbacks.append(MinMaxNormalizationCallback())
         else:
@@ -177,26 +179,32 @@ def add_visualizer_callback(callbacks: List[Callback], config: Union[DictConfig,
             if "local" not in config.project.log_images_to or len(config.project.log_images_to) > 1:
                 config.visualization["log_images"] = True
         config.visualization.task = config.dataset.task
-        config.visualization.inputs_are_normalized = not config.model.normalization_method == "none"
+        config.visualization.inputs_are_normalized = (
+            config.model.normalization_method != "none"
+        )
+
     else:
         config.visualization.task = config.data.init_args.task
-        config.visualization.inputs_are_normalized = not config.post_processing.normalization_method == "none"
+        config.visualization.inputs_are_normalized = (
+            config.post_processing.normalization_method != "none"
+        )
+
 
     if config.visualization.log_images or config.visualization.save_images or config.visualization.show_images:
         image_save_path = (
             config.visualization.image_save_path
-            if config.visualization.image_save_path
-            else config.project.path + "/images"
+            or f"{config.project.path}/images"
         )
-        for callback in (ImageVisualizerCallback, MetricVisualizerCallback):
-            callbacks.append(
-                callback(
-                    task=config.visualization.task,
-                    mode=config.visualization.mode,
-                    image_save_path=image_save_path,
-                    inputs_are_normalized=config.visualization.inputs_are_normalized,
-                    show_images=config.visualization.show_images,
-                    log_images=config.visualization.log_images,
-                    save_images=config.visualization.save_images,
-                )
+
+        callbacks.extend(
+            callback(
+                task=config.visualization.task,
+                mode=config.visualization.mode,
+                image_save_path=image_save_path,
+                inputs_are_normalized=config.visualization.inputs_are_normalized,
+                show_images=config.visualization.show_images,
+                log_images=config.visualization.log_images,
+                save_images=config.visualization.save_images,
             )
+            for callback in (ImageVisualizerCallback, MetricVisualizerCallback)
+        )

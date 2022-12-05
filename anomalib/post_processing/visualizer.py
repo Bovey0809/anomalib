@@ -149,11 +149,14 @@ class Visualizer:
             )
             return (visualization * 255).astype(np.uint8)
         if self.task == "classification":
-            if image_result.pred_label:
-                image_classified = add_anomalous_label(image_result.image, image_result.pred_score)
-            else:
-                image_classified = add_normal_label(image_result.image, 1 - image_result.pred_score)
-            return image_classified
+            return (
+                add_anomalous_label(image_result.image, image_result.pred_score)
+                if image_result.pred_label
+                else add_normal_label(
+                    image_result.image, 1 - image_result.pred_score
+                )
+            )
+
         raise ValueError(f"Unknown task type: {self.task}")
 
     @staticmethod

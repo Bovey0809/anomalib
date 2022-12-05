@@ -70,14 +70,8 @@ class Inferencer(ABC):
             ImageResult: Prediction results to be visualized.
         """
         if meta_data is None:
-            if hasattr(self, "meta_data"):
-                meta_data = getattr(self, "meta_data")
-            else:
-                meta_data = {}
-        if isinstance(image, (str, Path)):
-            image_arr: np.ndarray = read_image(image)
-        else:  # image is already a numpy array. Kept for mypy compatibility.
-            image_arr = image
+            meta_data = getattr(self, "meta_data") if hasattr(self, "meta_data") else {}
+        image_arr = read_image(image) if isinstance(image, (str, Path)) else image
         meta_data["image_shape"] = image_arr.shape[:2]
 
         processed_image = self.pre_process(image_arr)
@@ -153,12 +147,15 @@ class Inferencer(ABC):
             )
 
         # standardize pixel scores
-        if "pixel_mean" in meta_data.keys() and "pixel_std" in meta_data.keys():
-            if anomaly_maps is not None:
-                anomaly_maps = standardize(
-                    anomaly_maps, meta_data["pixel_mean"], meta_data["pixel_std"], center_at=meta_data["image_mean"]
-                )
-                anomaly_maps = normalize_cdf(anomaly_maps, meta_data["pixel_threshold"])
+        if (
+            "pixel_mean" in meta_data.keys()
+            and "pixel_std" in meta_data.keys()
+            and anomaly_maps is not None
+        ):
+            anomaly_maps = standardize(
+                anomaly_maps, meta_data["pixel_mean"], meta_data["pixel_std"], center_at=meta_data["image_mean"]
+            )
+            anomaly_maps = normalize_cdf(anomaly_maps, meta_data["pixel_threshold"])
 
         # standardize image scores
         if "image_mean" in meta_data.keys() and "image_std" in meta_data.keys():

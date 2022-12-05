@@ -58,8 +58,6 @@ class MetricsConfigurationCallback(Callback):
             pl_module (pl.LightningModule): Anomalib Model that inherits pl LightningModule.
             stage (Optional[str], optional): fit, validate, test or predict. Defaults to None.
         """
-        image_metric_names = [] if self.image_metric_names is None else self.image_metric_names
-
         pixel_metric_names: List[str]
         if self.pixel_metric_names is None:
             pixel_metric_names = []
@@ -74,6 +72,8 @@ class MetricsConfigurationCallback(Callback):
             pixel_metric_names = self.pixel_metric_names
 
         if isinstance(pl_module, AnomalyModule):
+            image_metric_names = [] if self.image_metric_names is None else self.image_metric_names
+
             pl_module.image_metrics = create_metric_collection(image_metric_names, "image_")
             pl_module.pixel_metrics = create_metric_collection(pixel_metric_names, "pixel_")
 

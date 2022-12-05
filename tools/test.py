@@ -24,8 +24,7 @@ def get_args() -> Namespace:
     parser.add_argument("--config", type=str, required=False, help="Path to a model config file")
     parser.add_argument("--weight_file", type=str, default="weights/model.ckpt")
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def test():

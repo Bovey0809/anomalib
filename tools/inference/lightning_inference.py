@@ -41,8 +41,7 @@ def get_args() -> Namespace:
         help="Show the visualized predictions on the screen.",
     )
 
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
 
 def infer():

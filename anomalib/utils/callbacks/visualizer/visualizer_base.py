@@ -74,7 +74,7 @@ class BaseVisualizerCallback(Callback):
                 if isinstance(available_loggers[log_to], ImageLoggerBase):
                     logger: ImageLoggerBase = cast(ImageLoggerBase, available_loggers[log_to])  # placate mypy
                     if isinstance(filename, Path):
-                        _name = filename.parent.name + "_" + filename.name
+                        _name = f"{filename.parent.name}_{filename.name}"
                     elif isinstance(filename, str):
                         _name = filename
                     logger.add_image(

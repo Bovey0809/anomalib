@@ -64,13 +64,12 @@ class AnomalyMapGenerator(nn.Module):
             Resized distance matrix matching the input image size
         """
 
-        score_map = F.interpolate(
+        return F.interpolate(
             distance,
             size=self.image_size,
             mode="bilinear",
             align_corners=False,
         )
-        return score_map
 
     def smooth_anomaly_map(self, anomaly_map: Tensor) -> Tensor:
         """Apply gaussian smoothing to the anomaly map.
@@ -82,8 +81,7 @@ class AnomalyMapGenerator(nn.Module):
             Filtered anomaly scores
         """
 
-        blurred_anomaly_map = self.blur(anomaly_map)
-        return blurred_anomaly_map
+        return self.blur(anomaly_map)
 
     def compute_anomaly_map(self, embedding: Tensor, mean: Tensor, inv_covariance: Tensor) -> Tensor:
         """Compute anomaly score.
@@ -105,9 +103,7 @@ class AnomalyMapGenerator(nn.Module):
             stats=[mean.to(embedding.device), inv_covariance.to(embedding.device)],
         )
         up_sampled_score_map = self.up_sample(score_map)
-        smoothed_anomaly_map = self.smooth_anomaly_map(up_sampled_score_map)
-
-        return smoothed_anomaly_map
+        return self.smooth_anomaly_map(up_sampled_score_map)
 
     def forward(self, **kwargs):
         """Returns anomaly_map.
@@ -125,7 +121,11 @@ class AnomalyMapGenerator(nn.Module):
             torch.Tensor: anomaly map
         """
 
-        if not ("embedding" in kwargs and "mean" in kwargs and "inv_covariance" in kwargs):
+        if (
+            "embedding" not in kwargs
+            or "mean" not in kwargs
+            or "inv_covariance" not in kwargs
+        ):
             raise ValueError(f"Expected keys `embedding`, `mean` and `covariance`. Found {kwargs.keys()}")
 
         embedding: Tensor = kwargs["embedding"]

@@ -147,14 +147,13 @@ class AnomalibCLI(LightningCLI):
         # If `resume_from_checkpoint` is not specified, it means that the project has not been created before.
         # Therefore, we need to create the project directory first.
         if config.trainer.resume_from_checkpoint is None:
-            root_dir = config.trainer.default_root_dir if config.trainer.default_root_dir else "./results"
+            root_dir = config.trainer.default_root_dir or "./results"
             model_name = config.model.class_path.split(".")[-1].lower()
             data_name = config.data.class_path.split(".")[-1].lower()
             category = config.data.init_args.category if "category" in config.data.init_args else ""
             time_stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             default_root_dir = os.path.join(root_dir, model_name, data_name, category, time_stamp)
 
-        # Otherwise, the assumption is that the project directory has alrady been created.
         else:
             # By default, train subcommand saves the weights to
             #   ./results/<model>/<data>/time_stamp/weights/model.ckpt.
@@ -163,7 +162,10 @@ class AnomalibCLI(LightningCLI):
             default_root_dir = str(Path(config.trainer.resume_from_checkpoint).parent.parent)
 
         if config.visualization.image_save_path == "":
-            self.config[subcommand].visualization.image_save_path = default_root_dir + "/images"
+            self.config[
+                subcommand
+            ].visualization.image_save_path = f"{default_root_dir}/images"
+
         self.config[subcommand].trainer.default_root_dir = default_root_dir
 
     def __set_callbacks(self) -> None:
@@ -206,11 +208,7 @@ class AnomalibCLI(LightningCLI):
         # Add timing to the pipeline.
         callbacks.append(TimerCallback())
 
-        #  TODO: This could be set in PostProcessingConfiguration callback
-        #   - https://github.com/openvinotoolkit/anomalib/issues/384
-        # Normalization.
-        normalization = config.post_processing.normalization_method
-        if normalization:
+        if normalization := config.post_processing.normalization_method:
             if normalization == "min_max":
                 callbacks.append(MinMaxNormalizationCallback())
             elif normalization == "cdf":
@@ -241,19 +239,20 @@ class AnomalibCLI(LightningCLI):
         else:
             warnings.warn(f"Export option: {config.export_mode} not found. Defaulting to no model export")
         if config.nncf:
-            if os.path.isfile(config.nncf) and config.nncf.endswith(".yaml"):
-                nncf_module = import_module("anomalib.core.callbacks.nncf_callback")
-                nncf_callback = getattr(nncf_module, "NNCFCallback")
-                callbacks.append(
-                    nncf_callback(
-                        config=OmegaConf.load(config.nncf),
-                        dirpath=os.path.join(config.trainer.default_root_dir, "compressed"),
-                        filename="model",
-                    )
-                )
-            else:
+            if not os.path.isfile(config.nncf) or not config.nncf.endswith(
+                ".yaml"
+            ):
                 raise ValueError(f"--nncf expects a path to nncf config which is a yaml file, but got {config.nncf}")
 
+            nncf_module = import_module("anomalib.core.callbacks.nncf_callback")
+            nncf_callback = getattr(nncf_module, "NNCFCallback")
+            callbacks.append(
+                nncf_callback(
+                    config=OmegaConf.load(config.nncf),
+                    dirpath=os.path.join(config.trainer.default_root_dir, "compressed"),
+                    filename="model",
+                )
+            )
         self.config[subcommand].trainer.callbacks = callbacks
 
     def before_instantiate_classes(self) -> None:

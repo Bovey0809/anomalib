@@ -106,8 +106,7 @@ class OCBE(nn.Module):
                 norm_layer(planes * block.expansion),
             )
 
-        layers = []
-        layers.append(
+        layers = [
             block(
                 self.inplanes * 3,
                 planes,
@@ -118,19 +117,20 @@ class OCBE(nn.Module):
                 previous_dilation,
                 norm_layer,
             )
-        )
+        ]
+
         self.inplanes = planes * block.expansion
-        for _ in range(1, blocks):
-            layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    groups=self.groups,
-                    base_width=self.base_width,
-                    dilation=self.dilation,
-                    norm_layer=norm_layer,
-                )
+        layers.extend(
+            block(
+                self.inplanes,
+                planes,
+                groups=self.groups,
+                base_width=self.base_width,
+                dilation=self.dilation,
+                norm_layer=norm_layer,
             )
+            for _ in range(1, blocks)
+        )
 
         return nn.Sequential(*layers)
 
@@ -162,9 +162,8 @@ def get_bottleneck_layer(backbone: str, **kwargs) -> OCBE:
     Returns:
         Bottleneck_layer: One-Class Bottleneck Embedding module.
     """
-    if backbone in ("resnet18", "resnet34"):
-        ocbe = OCBE(BasicBlock, 2, **kwargs)
-    else:
-        ocbe = OCBE(Bottleneck, 3, **kwargs)
-
-    return ocbe
+    return (
+        OCBE(BasicBlock, 2, **kwargs)
+        if backbone in {"resnet18", "resnet34"}
+        else OCBE(Bottleneck, 3, **kwargs)
+    )

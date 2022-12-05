@@ -28,9 +28,11 @@ class AUROC(ROC):
 
         fpr, tpr = self._compute()
         # TODO: use stable sort after upgrading to pytorch 1.9.x (https://github.com/openvinotoolkit/anomalib/issues/92)
-        if not (torch.all(fpr.diff() <= 0) or torch.all(fpr.diff() >= 0)):
-            return auc(fpr, tpr, reorder=True)  # only reorder if fpr is not increasing or decreasing
-        return auc(fpr, tpr)
+        return (
+            auc(fpr, tpr)
+            if (torch.all(fpr.diff() <= 0) or torch.all(fpr.diff() >= 0))
+            else auc(fpr, tpr, reorder=True)
+        )
 
     def update(self, preds: Tensor, target: Tensor) -> None:  # type: ignore
         """Update state with new values.
